@@ -8,22 +8,16 @@ byte mac[] = { 0xA8, 0x40, 0x41, 0x1B, 0xF1, 0x10 };
 EthernetServer server(80);
 
 #include <ArduinoJson.h>
-StaticJsonDocument<255> docInput;
-StaticJsonDocument<255> docOutput;
-StaticJsonDocument<255> docMineArray;
+StaticJsonDocument<100> docInput;
+StaticJsonDocument<100> docOutput;
+StaticJsonDocument<100> docMineArray;
 String jsonOutput;
 
 String response;
-char buff[300];
 // Set center frequency
 uint32_t freq = 915E6;
 
 String incomingString = "";
-
-int pckBuff = 0;
-double latitudeBuff;
-double longitudeBuff;
-bool relayBuff;
 byte receivedPackageCounter = 0;
 String recivedPacketInfo = "";
 
@@ -31,14 +25,14 @@ BridgeClient client;
 
 bool relay = true;
 
-struct mineStruct{
+struct mineStruct {
+  char structId[20];
   String structStatus;
-  double structLatitude;
-  double structLongitude;
+  float structLatitude;
+  float structLongitude;
 };
 
-const byte sizeOfArray = 10;
-int structArrayOfMine[sizeOfArray];
+struct mineStruct mineqwerty[10];
 
 void setup() {
   Bridge.begin(115200);
@@ -51,8 +45,11 @@ void setup() {
   Ethernet.begin(mac);
   server.begin();
 
-  mineStruct mineqwerty = {"OK", 50.443222, 30.447847}; //3792142 is mine ID
-  structArrayOfMine[0] = &mineqwerty;
+  //mineqwerty[0] = { strcpy(mineqwerty[0].structId,"an34ju141ol"), "OK", 50.443222, 30.447847 };  //3792142 is mine ID
+  strcpy(mineqwerty[0].structId, "an34ju141ol");
+  mineqwerty[0].structStatus = "OK";
+  mineqwerty[0].structLatitude = 50.443222;
+  mineqwerty[0].structLongitude = 30.447847;
 
   if (!LoRa.begin(freq)) {
     Console.println("Starting LoRa failed!");
@@ -65,6 +62,9 @@ void setup() {
 }
 
 void loop() {
+  Console.print("Server is at ");
+  Console.println(Ethernet.localIP());
+  mineServer();
   if (LoRa.parsePacket()) {
     Serial.println("receive");
     onReceive();
@@ -77,6 +77,11 @@ void loop() {
 void onReceive() {
   //if (packetSize == 0) return;
   incomingString = "";
+  int pckBuff = 0;
+  double latitudeBuff;
+  double longitudeBuff;
+  bool relayBuff;
+  byte packageBuffNumb;
   bool receivedPackageIndex;
 
   while (LoRa.available()) {
@@ -90,19 +95,20 @@ void onReceive() {
   double longitude = docInput["gps"][1];
   bool relay = docInput["relay"];
 
-  /*Рахуємо унікальні пакети. У разі, якщо отримуємо кілька пакетів з однаковою інформацією,
+  /*
+   Рахуємо унікальні пакети. У разі, якщо отримуємо кілька пакетів з однаковою інформацією,
    ми їх зберігаємо у буфері, а виводимо коли отримуємо новий пакет даних, 
    таким чином кількість отриманих унікальних пакетів буде актуальною
   */
-  if (packetNumb == pckbuff) {
+  if (packetNumb == packageBuffNumb) {
     receivedPackageIndex = true;
     receivedPackageCounter++;
     latitudeBuff = latitude;
     longitudeBuff = longitude;
     relayBuff = relay;
     recivedPacketInfo = "Received " + (String)receivedPackageCounter + " packets with RSSI " + (String)LoRa.packetRssi() + " and SNR " + (String)LoRa.packetSnr();
-  } else if (packetNumb > pckbuff) {
-    pckbuff = packetNumb;
+  } else if (packetNumb > packageBuffNumb) {
+    packageBuffNumb = packetNumb;
     receivedPackageCounter = 0;
     if (receivedPackageIndex) {
       Console.println(recivedPacketInfo);
@@ -111,7 +117,7 @@ void onReceive() {
       Console.print("Longitude: ");
       Console.println(longitudeBuff);
       Console.print("Relay: ");
-      Console.println(relaybuff);
+      Console.println(relayBuff);
     } else {
       Console.println("Received 1 packet with RSSI " + (String)LoRa.packetRssi() + " and SNR " + (String)LoRa.packetSnr());
       Console.print("Latitude: ");
@@ -122,7 +128,7 @@ void onReceive() {
       Console.println(relay);
     }
     Console.println(incomingString);
-    sendAck(pckbuff);
+    sendAck(packageBuffNumb);
   }
 }
 
@@ -182,10 +188,10 @@ void sendPacket(String packetOutput) {
 
 void serializeJsonWithMineInfo() {
   JsonObject mine1 = docMineArray.createNestedObject();
-  mine1["ID"] = structArrayOfMine[0];
-  mine1["status"] = structArrayOfMine[0].structStatus;
-  mine1["gps"][0] = structArrayOfMine[0].structLatitude;
-  mine1["gps"][2] = structArrayOfMine[0].structLongitude;
+  mine1["ID"] = mineqwerty[0].structId;
+  mine1["status"] = mineqwerty[0].structStatus;
+  mine1["gps"][0] = mineqwerty[0].structLatitude;
+  mine1["gps"][2] = mineqwerty[0].structLongitude;
 }
 
 void mineServer() {
@@ -208,8 +214,8 @@ void mineServer() {
           client.println("Content-Type: text/html");
           client.println("Connection: close");  // the connection will be closed after completion of the response
           client.println("Refresh: 5");         // refresh the page automatically every 5 sec
-          serializeJsonPretty(docMineArray, client);
-          client.println();
+          //serializeJsonPretty(docMineArray, client);
+          client.println("FUCK");
           break;
         }
         if (c == '\n') {
