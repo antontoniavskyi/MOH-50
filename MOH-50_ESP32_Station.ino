@@ -1,7 +1,7 @@
 /*
    curl -X POST 192.168.4.1/post -H "Content-type: application/x-www-form-urlencoded" -d "mineID=8947652&state=1"
 */
-#define tbeam
+#define ttgo //tbeam
 #define AP //change Access Point or Station mode
 #define DEBUG
 
@@ -43,8 +43,11 @@ void startLora() {
     Serial.println("Starting LoRa failed!");
     appendFile(SPIFFS, "/log", "Starting LoRa failed!\r\n");
   }
-  LoRa.setSyncWord(0xA3);
   LoRa.setTxPower(20);
+  LoRa.setSyncWord(0xA3);
+  LoRa.setSpreadingFactor(12);
+  LoRa.setSignalBandwidth(62.5E3);
+  LoRa.setCodingRate4(4/8);
   LoRa.receive();
   Serial.println("LoRa Initializing OK!");
   appendFile(SPIFFS, "/log", "LoRa Initializing OK!\r\n");
@@ -53,7 +56,7 @@ void startLora() {
 void setup() {
   Serial.begin(115200);
   preferences.begin("mine", false);
- 
+
   received_package_counter = preferences.getUInt("packageCounter", 0);
 
 #ifdef DEBUG
@@ -277,6 +280,8 @@ void serializeJsonSendToLora(String boomMineID, bool boomState) {
       docOutput["ID"] = boomMineID;
       docOutput["relay"] = boomState;
       serializeJson(docOutput, jsonOutput);
+      Serial.print(jsonOutput);
+      Serial.println(sizeof(jsonOutput));
       sendPacket(jsonOutput);
       packetCounter++;
     }
