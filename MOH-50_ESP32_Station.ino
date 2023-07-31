@@ -3,7 +3,7 @@
 */
 #define tbeam
 #define AP //change Access Point or Station mode
-#define DEBUG
+#define DEBUG //comment it if you don't want to use serial monitor
 
 #include <SPI.h>
 #include <LoRa.h>
