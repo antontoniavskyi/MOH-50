@@ -1,6 +1,5 @@
 #include <TinyGPS++.h>
 
-
 float latitude; //Defined here, because compiler show redefinition error
 float longitude; //Defined here, because compiler show redefinition error
 

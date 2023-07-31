@@ -1,7 +1,8 @@
 /*
    For board T-Beam,
+   cd Nextcloud/PC_files/Development/Arduino/MOH-50/MOH-50_v5/
 */
-//#define DEBUG
+#define DEBUG //comment it if you don't want to use serial monitor
 
 #include <SPI.h>
 #include <ArduinoJson.h>
