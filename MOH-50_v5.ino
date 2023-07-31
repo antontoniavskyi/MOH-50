@@ -1,7 +1,7 @@
 /*
    For board T-Beam,
 */
-#define DEBUG
+//#define DEBUG
 
 #include <SPI.h>
 #include <ArduinoJson.h>
@@ -37,6 +37,7 @@ int receiveCounter = 0;
 int pckCounter = 0;
 uint32_t receiveID = 0;
 const char* pckstate;
+char buf[21];
 
 //Mine ID
 uint32_t chipID = 0;
@@ -47,15 +48,27 @@ unsigned long offsetMillis()
 }
 
 void setup() {
+  initLoRa();
+
 #ifdef DEBUG
   Serial.begin(115200);
-#endif
 
-#ifdef DEBUG
   printWakeUpReason();
   printResetReason();
+
+  Serial.println("===========BATTERY===========");
+  bool batteryConnect = PMU->isBatteryConnect();
+  Serial.println("BATTERY:%s" + (String)batteryConnect ? "CONNECT" : "DISCONNECT");
+  if (batteryConnect) {
+    Serial.println("BATTERY VOLTAGE: " + (String)PMU->getBattVoltage());
+    Serial.println("BATTERY LEVEL PERCENTAGE: " + (String)PMU->getBatteryPercent());
+  } else {
+    Serial.println("USB VOLTAGE: " + (String)PMU->getVbusVoltage());
+  }
+  Serial.println("===========BATTERY===========");
 #endif
 
+  getRuntime();
   setCpuFrequencyMhz(80);
   timer3 = offsetMillis();
 
@@ -66,7 +79,7 @@ void setup() {
   pinMode(relay_GPIO, OUTPUT);
   digitalWrite(relay_GPIO, true);
 
-  initLoRa();
+
 }
 
 void loop() {
@@ -83,11 +96,11 @@ void loop() {
           onReceive();
         }
         timer = offsetMillis();
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.print("Sending packet: ");
         Serial.println(sentCounter);
         Serial.println("My ID: " + (String)chipID);
-        #endif
+#endif
         jsonOutput = "";
         unsigned long timeout1 = millis();
         gpsRequest();//FOR t-beam
@@ -95,10 +108,11 @@ void loop() {
         docOutput["ID"] = (String)chipID;
 
 #if defined(tbeam)
-        docOutput["voltage"] = PMU->getBattVoltage();//FOR t-beam
+        docOutput["voltage"] = PMU->getBatteryPercent();//PMU->getBattVoltage();//FOR t-beam
 #endif
 
         docOutput["status"] = "OK";
+        docOutput["runtime"] = buf;
         docOutput["gps"][0] = latitude; //48.57966877;
         docOutput["gps"][1] = longitude; //38.01243977;
         docOutput["relay"] = relay;
@@ -112,6 +126,7 @@ void loop() {
 
   if (offsetMillis() - timer3 > 3 * 1000) {
     timer3 = offsetMillis();
+    LoRa.sleep();
     goToSleep();
   }
 }
@@ -125,7 +140,7 @@ void onReceive() {
   while (LoRa.available()) {
     incoming = LoRa.readString();
   }
-  
+
 #ifdef DEBUG
   Serial.println(incoming);
 #endif
@@ -159,4 +174,17 @@ void infiniteBoomState() {
       digitalWrite(relay_GPIO, ledstate);
     }
   }
+}
+
+void getRuntime() {
+  unsigned long runMillis = offsetMillis();
+  unsigned long allSeconds = offsetMillis() / 1000;
+  int runHours = allSeconds / 3600;
+  int secsRemaining = allSeconds % 3600;
+  int runMinutes = secsRemaining / 60;
+  int runSeconds = secsRemaining % 60;
+
+
+  sprintf(buf, "%02d:%02d:%02d", runHours, runMinutes, runSeconds);
+  Serial.println(buf);
 }
