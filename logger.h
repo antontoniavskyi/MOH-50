@@ -17,9 +17,9 @@ void initSPIFFS() {
 
 //get reason of last esp32 reset 
 void getResetReason() {
-  byte r = esp_reset_reason();
-  Serial.println(resetReason[r]);
-  appendFile(SPIFFS, "/log", resetReason[r]);
+  //byte r = esp_reset_reason();
+  Serial.println(resetReason[esp_reset_reason()]);
+  appendFile(SPIFFS, "/log", resetReason[esp_reset_reason()]);
   appendFile(SPIFFS, "/log", "\r\n");
 }
 

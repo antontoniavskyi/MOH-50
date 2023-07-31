@@ -1,12 +1,13 @@
 void showstructure();
-void saveDataInStructure(String structMineID, float structureLatitude, float structureLongitude, uint16_t structurevoltage, String packetTime, String structureStatus, int structureRssi, float structureSnr) {
+void saveDataInStructure(String structMineID, float structureLatitude, float structureLongitude, uint16_t structurevoltage, String packetTime, String structureStatus, int structureRssi, float structureSnr, char* structureRuntime) {
   savedData = false;
   for (byte t = 0; t < mineCount; t++) {
     if (mineqwerty[t].structId == structMineID) {
       mineqwerty[t].structStatus = structureStatus;
       mineqwerty[t].structLatitude = structureLatitude;
       mineqwerty[t].structLongitude = structureLongitude;
-
+      strcpy(mineqwerty[t].structRuntime, structureRuntime);
+      
       mineqwerty[t].structVoltage = structurevoltage;
       mineqwerty[t].structLastRecived = packetTime;
       mineqwerty[t].structRssi = structureRssi;
@@ -20,9 +21,10 @@ void saveDataInStructure(String structMineID, float structureLatitude, float str
       if (mineqwerty[t].structId == "0") {
         mineqwerty[t].structId = structMineID;
         mineqwerty[t].structStatus = structureStatus;
-        
+
         mineqwerty[t].structLatitude = structureLatitude;
         mineqwerty[t].structLongitude = structureLongitude;
+        strcpy(mineqwerty[t].structRuntime, structureRuntime);
 
         mineqwerty[t].structVoltage = structurevoltage;
         mineqwerty[t].structLastRecived = packetTime;
@@ -62,9 +64,9 @@ void eraseStructure(bool eraseState, String eraseID) {
         mineqwerty[w].structRssi = 0;
         mineqwerty[w].structSnr = 0;
         break;
+        Serial.println("DEBUG");
       }
     }
-    Serial.println("DEBUG");
   }
 }
 

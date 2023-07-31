@@ -1,7 +1,7 @@
 /*
    curl -X POST 192.168.4.1/post -H "Content-type: application/x-www-form-urlencoded" -d "mineID=8947652&state=1"
 */
-#define ttgo //tbeam
+#define tbeam
 #define AP //change Access Point or Station mode
 #define DEBUG
 
@@ -45,9 +45,9 @@ void startLora() {
   }
   LoRa.setTxPower(20);
   LoRa.setSyncWord(0xA3);
-  LoRa.setSpreadingFactor(12);
+  LoRa.setSpreadingFactor(9);
   LoRa.setSignalBandwidth(62.5E3);
-  LoRa.setCodingRate4(4/8);
+  LoRa.setCodingRate4(4 / 5);
   LoRa.receive();
   Serial.println("LoRa Initializing OK!");
   appendFile(SPIFFS, "/log", "LoRa Initializing OK!\r\n");
@@ -181,6 +181,8 @@ void onReceive() {
   String mineID = docInput["ID"];
   String mineStatus = docInput["status"];
   uint16_t voltage = docInput["voltage"];
+  char runtime[21];
+  strcpy(runtime, docInput["runtime"]);
   float latitude = docInput["gps"][0];
   float longitude = docInput["gps"][1];
   bool relay = docInput["relay"];
@@ -192,7 +194,7 @@ void onReceive() {
     lastReceivedPacketTime();
     }*/
   //Serial.println("Received: " + (String)packetNumb + " " + mineID + " " + mineStatus + " " + (String)voltage + " " + (String)latitude + " " + (String)longitude+ " " + (String)rssi + " " + (String)snr);
-  saveDataInStructure(mineID, latitude, longitude, voltage, lastPacketTime, mineStatus, rssi, snr);
+  saveDataInStructure(mineID, latitude, longitude, voltage, lastPacketTime, mineStatus, rssi, snr, runtime);
   //lastReceivedPacketTimeWebServer();
 
   /*
@@ -274,14 +276,13 @@ void readSerial() {
 void serializeJsonSendToLora(String boomMineID, bool boomState) {
   unsigned long timeout1 = millis();
   byte packetCounter = 0;
-  while (packetCounter < 10) {
-    if (millis() - timeout1 > 200) {
-      jsonOutput = "";
-      docOutput["ID"] = boomMineID;
-      docOutput["relay"] = boomState;
-      serializeJson(docOutput, jsonOutput);
-      Serial.print(jsonOutput);
-      Serial.println(sizeof(jsonOutput));
+  jsonOutput = "";
+  docOutput["ID"] = boomMineID;
+  docOutput["relay"] = boomState;
+  serializeJson(docOutput, jsonOutput);
+  while (packetCounter < 15) {
+    if (millis() - timeout1 > 400) {
+      Serial.println(jsonOutput);
       sendPacket(jsonOutput);
       packetCounter++;
     }
@@ -390,10 +391,10 @@ void webServerInformation() {
   for (byte i = 0; i < mineCount; i++) {
 
     if (i == mineCount - 1) {
-      information += "{\"ID\":\"" + mineqwerty[i].structId + "\",\"status\":\"" + mineqwerty[i].structStatus + ",\"voltage\":" + mineqwerty[i].structVoltage + "\",\"gps\":[" + String(mineqwerty[i].structLatitude, 6) + "," + String(mineqwerty[i].structLongitude, 6) + "]" + ",\"RSSI\":" + mineqwerty[i].structRssi + ",\"SNR\":" + mineqwerty[i].structSnr + "}";
+      information += "{\"ID\":\"" + mineqwerty[i].structId + "\",\"status\":\"" + mineqwerty[i].structStatus + ",\"voltage\":" + mineqwerty[i].structVoltage + ",\"runtime\":" + mineqwerty[i].structRuntime + "\",\"gps\":[" + String(mineqwerty[i].structLatitude, 6) + "," + String(mineqwerty[i].structLongitude, 6) + "]" + ",\"RSSI\":" + mineqwerty[i].structRssi + ",\"SNR\":" + mineqwerty[i].structSnr + "}";
       break;
     }
-    information += "{\"ID\":\"" + mineqwerty[i].structId + "\",\"status\":\"" + mineqwerty[i].structStatus + ",\"voltage\":" + mineqwerty[i].structVoltage + "\",\"gps\":[" + String(mineqwerty[i].structLatitude, 6) + "," + String(mineqwerty[i].structLongitude, 6) + "]" + ",\"RSSI\":" + mineqwerty[i].structRssi + ",\"SNR\":" + mineqwerty[i].structSnr + "},";
+    information += "{\"ID\":\"" + mineqwerty[i].structId + "\",\"status\":\"" + mineqwerty[i].structStatus + ",\"voltage\":" + mineqwerty[i].structVoltage + ",\"runtime\":" + mineqwerty[i].structRuntime + "\",\"gps\":[" + String(mineqwerty[i].structLatitude, 6) + "," + String(mineqwerty[i].structLongitude, 6) + "]" + ",\"RSSI\":" + mineqwerty[i].structRssi + ",\"SNR\":" + mineqwerty[i].structSnr + "},";
   }
   information += "]";
 

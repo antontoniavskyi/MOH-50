@@ -67,7 +67,7 @@ static char varForLatitude[15];
 static char varForLongitude[15];
 
 //Reset reason varuiable
-const char * resetReason[12] = {"Reset reason can not be determined", "Reset due to power-on event", "Reset by external pin (not applicable for ESP32)", "Software reset via esp_restart", "Software reset due to exception/panic", "Reset (software or hardware) due to interrupt watchdog", "Reset due to task watchdog", "Reset due to other watchdogs", "Reset after exiting deep sleep mode", "Brownout reset (software or hardware)", "Reset over SDIO", "Reset by USB peripheral"};
+const char * resetReason[16] = {"Reset reason can not be determined", "Reset due to power-on event", "Reset by external pin (not applicable for ESP32)", "Software reset via esp_restart", "Software reset due to exception/panic", "Reset (software or hardware) due to interrupt watchdog", "Reset due to task watchdog", "Reset due to other watchdogs", "Reset after exiting deep sleep mode", "Brownout reset (software or hardware)", "Reset over SDIO", "Reset by USB peripheral", "RTC Watch dog Reset CPU", "for APP CPU, reseted by PRO CPU", "Reset when the vdd voltage is not stable", "RTC Watch dog reset digital core and rtc module"};
 uint32_t resetCounter;
 //----------------System----------------
 
@@ -86,6 +86,7 @@ struct mineStruct {
   uint16_t structVoltage;
   float structLatitude;
   float structLongitude;
+  char structRuntime[21];
 
   String structLastRecived;
   int structRssi;
