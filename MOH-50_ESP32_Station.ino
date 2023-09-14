@@ -391,10 +391,10 @@ void webServerInformation() {
   for (byte i = 0; i < mineCount; i++) {
 
     if (i == mineCount - 1) {
-      information += "{\"ID\":\"" + mineqwerty[i].structId + "\",\"status\":\"" + mineqwerty[i].structStatus + ",\"voltage\":" + mineqwerty[i].structVoltage + ",\"runtime\":" + mineqwerty[i].structRuntime + "\",\"gps\":[" + String(mineqwerty[i].structLatitude, 6) + "," + String(mineqwerty[i].structLongitude, 6) + "]" + ",\"RSSI\":" + mineqwerty[i].structRssi + ",\"SNR\":" + mineqwerty[i].structSnr + "}";
+      information += "{\"ID\":\"" + mineqwerty[i].structId + "\",\"status\":\"" + mineqwerty[i].structStatus + "\",\"voltage\":" + mineqwerty[i].structVoltage + ",\"runtime\":" + mineqwerty[i].structRuntime + "\",\"gps\":[" + String(mineqwerty[i].structLatitude, 6) + "," + String(mineqwerty[i].structLongitude, 6) + "]" + ",\"RSSI\":" + mineqwerty[i].structRssi + ",\"SNR\":" + mineqwerty[i].structSnr + "}";
       break;
     }
-    information += "{\"ID\":\"" + mineqwerty[i].structId + "\",\"status\":\"" + mineqwerty[i].structStatus + ",\"voltage\":" + mineqwerty[i].structVoltage + ",\"runtime\":" + mineqwerty[i].structRuntime + "\",\"gps\":[" + String(mineqwerty[i].structLatitude, 6) + "," + String(mineqwerty[i].structLongitude, 6) + "]" + ",\"RSSI\":" + mineqwerty[i].structRssi + ",\"SNR\":" + mineqwerty[i].structSnr + "},";
+    information += "{\"ID\":\"" + mineqwerty[i].structId + "\",\"status\":\"" + mineqwerty[i].structStatus + "\",\"voltage\":" + mineqwerty[i].structVoltage + ",\"runtime\":" + mineqwerty[i].structRuntime + "\",\"gps\":[" + String(mineqwerty[i].structLatitude, 6) + "," + String(mineqwerty[i].structLongitude, 6) + "]" + ",\"RSSI\":" + mineqwerty[i].structRssi + ",\"SNR\":" + mineqwerty[i].structSnr + "},";
   }
   information += "]";
 
